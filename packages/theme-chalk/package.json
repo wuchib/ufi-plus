@@ -1,0 +1,13 @@
+{
+  "name": "@ufi-plus/theme-chalk",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "index.css",
+  "files": [
+    "index.css"
+  ],
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {}
+}
