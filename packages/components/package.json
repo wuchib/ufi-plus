@@ -16,7 +16,9 @@
   "devDependencies": {
     "jsdom": "^27.1.0",
     "tsup": "^8.3.0",
-    "vue": "^3.5.12"
+    "vue": "^3.5.12",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "@vue/test-utils": "^2.4.6"
   },
   "exports": {
     ".": {
@@ -25,7 +27,6 @@
     }
   },
   "dependencies": {
-    "@vitejs/plugin-vue": "^5.1.4",
-    "@vue/test-utils": "^2.4.6"
+    "@ufi-plus/utils": "workspace:*"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "ufi-plus-play",
+  "name": "@ufi-plus/play",
   "private": true,
   "type": "module",
   "scripts": {
