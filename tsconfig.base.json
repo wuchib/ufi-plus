@@ -14,7 +14,7 @@
       "DOM"
     ],
     "types": [
-      "vite/client",
+      // "vite/client",
       "vitest/globals"
     ],
     "baseUrl": ".",
