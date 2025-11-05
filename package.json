@@ -10,6 +10,8 @@
     "test": "vitest",
     "docs:dev": "pnpm -C docs dev",
     "docs:build": "pnpm -C docs build",
+    "storybook": "pnpm --filter @ufi-plus/story-docs storybook",
+    "storybook:build": "pnpm --filter @ufi-plus/story-docs build-storybook",
     "release": "changeset version && pnpm i -w && changeset publish",
     "gen": "bash scripts/gen.sh"
   },

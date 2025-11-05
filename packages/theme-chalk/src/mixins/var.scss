@@ -1,0 +1,134 @@
+@import './config';
+
+//
+// ZFDesign-inspired color system
+// This file defines SCSS variables and also exposes CSS variables
+// under the `--#{$namespace}-*` namespace for runtime theming.
+//
+
+// Brand colors
+$color-brand-normal: #0099ff !default;
+$color-brand-hover: #00a4ff !default;
+$color-brand-click: #008aff !default;
+$color-brand-disable: rgba($color-brand-normal, 0.4) !default; // 40%
+$color-brand-bg: rgba($color-brand-normal, 0.15) !default; // 15%
+$color-brand-opacity20: rgba($color-brand-normal, 0.2) !default; // 20%
+
+// Neutral colors (white with different opacities for dark UI)
+$color-neutral-100: #ffffff !default; // 100%
+$color-neutral-85: rgba(#ffffff, 0.85) !default;
+$color-neutral-65: rgba(#ffffff, 0.65) !default;
+$color-neutral-45: rgba(#ffffff, 0.45) !default;
+$color-neutral-25: rgba(#ffffff, 0.25) !default;
+$color-neutral-15: rgba(#ffffff, 0.15) !default;
+$color-neutral-5: rgba(#ffffff, 0.05) !default;
+
+// Panel colors (dark surfaces)
+$color-panel-1: #1f2024 !default;
+$color-panel-2: #2a2b30 !default;
+$color-panel-3: #35363b !default;
+$color-panel-base: #1a1a1e !default;
+$color-panel-weak: #161619 !default;
+
+// Divider colors
+$color-divider-1: #2a2b30 !default;
+$color-divider-2: #24262a !default;
+$color-divider-3: #35363b !default; // can be used with gradients
+
+// Border colors
+$color-border-1: #35363b !default;
+$color-border-2: #404147 !default;
+
+// Functional colors
+$color-info: #0099ff !default;
+$color-success: #23c240 !default;
+$color-warning: #f4d060 !default;
+$color-error: #e9522d !default;
+
+$color-info-bg: rgba($color-info, 0.15) !default; // 15%
+$color-success-bg: rgba($color-success, 0.15) !default; // 15%
+$color-warning-bg: rgba($color-warning, 0.15) !default; // 15%
+$color-error-bg: rgba($color-error, 0.15) !default; // 15%
+
+// Auxiliary palette
+$color-aux-1: #0055ff !default;
+$color-aux-2: #00cfff !default;
+$color-aux-3: #5b52b8 !default;
+$color-aux-4: #faa92b !default;
+$color-aux-5: #ff3d87 !default;
+
+// Background colors
+$color-background-1: #0d0e0e !default; // app background
+$color-background-2: rgba(#0d0e0e, 0.8) !default; // overlays, drawers
+
+// Gradient tokens
+$gradient-1: linear-gradient(180deg, #0055ff 0%, #0099ff 100%) !default;
+$gradient-2: linear-gradient(180deg, #0099ff 0%, #00ccff 100%) !default;
+$gradient-3: linear-gradient(180deg, rgba(#35363b, 1) 0%, rgba(#35363b, 0) 100%) !default; // divider fade
+$gradient-4: linear-gradient(180deg, #ffffff 0%, rgba(#ffffff, 0) 100%) !default; // subtle white fade
+
+//
+// Export as CSS variables for runtime usage
+// Naming: --ufi-color-<group>-<name> and --ufi-gradient-<name>
+//
+:root {
+  // brand
+  --#{$namespace}-color-brand-normal: #{$color-brand-normal};
+  --#{$namespace}-color-brand-hover: #{$color-brand-hover};
+  --#{$namespace}-color-brand-click: #{$color-brand-click};
+  --#{$namespace}-color-brand-disable: #{$color-brand-disable};
+  --#{$namespace}-color-brand-bg: #{$color-brand-bg};
+  --#{$namespace}-color-brand-opacity20: #{$color-brand-opacity20};
+
+  // neutral
+  --#{$namespace}-color-neutral-100: #{$color-neutral-100};
+  --#{$namespace}-color-neutral-85: #{$color-neutral-85};
+  --#{$namespace}-color-neutral-65: #{$color-neutral-65};
+  --#{$namespace}-color-neutral-45: #{$color-neutral-45};
+  --#{$namespace}-color-neutral-25: #{$color-neutral-25};
+  --#{$namespace}-color-neutral-15: #{$color-neutral-15};
+  --#{$namespace}-color-neutral-5: #{$color-neutral-5};
+
+  // panel
+  --#{$namespace}-color-panel-1: #{$color-panel-1};
+  --#{$namespace}-color-panel-2: #{$color-panel-2};
+  --#{$namespace}-color-panel-3: #{$color-panel-3};
+  --#{$namespace}-color-panel-base: #{$color-panel-base};
+  --#{$namespace}-color-panel-weak: #{$color-panel-weak};
+
+  // divider
+  --#{$namespace}-color-divider-1: #{$color-divider-1};
+  --#{$namespace}-color-divider-2: #{$color-divider-2};
+  --#{$namespace}-color-divider-3: #{$color-divider-3};
+
+  // border
+  --#{$namespace}-color-border-1: #{$color-border-1};
+  --#{$namespace}-color-border-2: #{$color-border-2};
+
+  // function
+  --#{$namespace}-color-info: #{$color-info};
+  --#{$namespace}-color-success: #{$color-success};
+  --#{$namespace}-color-warning: #{$color-warning};
+  --#{$namespace}-color-error: #{$color-error};
+  --#{$namespace}-color-info-bg: #{$color-info-bg};
+  --#{$namespace}-color-success-bg: #{$color-success-bg};
+  --#{$namespace}-color-warning-bg: #{$color-warning-bg};
+  --#{$namespace}-color-error-bg: #{$color-error-bg};
+
+  // auxiliary
+  --#{$namespace}-color-aux-1: #{$color-aux-1};
+  --#{$namespace}-color-aux-2: #{$color-aux-2};
+  --#{$namespace}-color-aux-3: #{$color-aux-3};
+  --#{$namespace}-color-aux-4: #{$color-aux-4};
+  --#{$namespace}-color-aux-5: #{$color-aux-5};
+
+  // background
+  --#{$namespace}-color-background-1: #{$color-background-1};
+  --#{$namespace}-color-background-2: #{$color-background-2};
+
+  // gradient
+  --#{$namespace}-gradient-1: #{$gradient-1};
+  --#{$namespace}-gradient-2: #{$gradient-2};
+  --#{$namespace}-gradient-3: #{$gradient-3};
+  --#{$namespace}-gradient-4: #{$gradient-4};
+}
