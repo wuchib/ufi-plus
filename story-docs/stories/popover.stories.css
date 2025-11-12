@@ -1,0 +1,28 @@
+.story-popover-page {
+  min-height: 160vh;
+  padding: 40px 0 120px;
+  background: linear-gradient(180deg, #f7f8fb 0%, #fff 60%);
+  overflow-y: auto;
+}
+
+.story-popover-inner {
+  width: min(480px, 90%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.story-popover-placeholder {
+  width: 100%;
+  height: 72px;
+  border-radius: 12px;
+  background-color: #eef1f6;
+  color: #7d879c;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px #e2e6ef;
+}

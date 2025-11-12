@@ -26,3 +26,19 @@
 .ufi-button--warning{ background: var(--ufi-color-warning); color:#fff; border-color: var(--ufi-color-warning); }
 .ufi-button--danger{  background: var(--ufi-color-danger);  color:#fff; border-color: var(--ufi-color-danger);  }
 .ufi-button--info{    background: var(--ufi-color-info);    color:#fff; border-color: var(--ufi-color-info);    }
+
+
+.testWrap{
+  width: 100%;
+  height: calc(100vh - 40px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.testWrap .inner{
+    width: 200px;
+    height: 400px;
+    padding: 10px;
+    overflow: auto;
+}
