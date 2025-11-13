@@ -45,6 +45,12 @@ const meta: Meta<typeof UPoppover> = {
             </UButton>
           </UPoppover>
 
+          <UPoppover v-bind="args">
+            <UButton type="primary">
+              {{ args.trigger === 'click' ? '点击触发' : '悬停触发' }}
+            </UButton>
+          </UPoppover>
+
           <div
             v-for="n in 10"
             :key="'bottom-' + n"
