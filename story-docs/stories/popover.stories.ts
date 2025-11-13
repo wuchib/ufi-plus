@@ -31,6 +31,11 @@ const meta: Meta<typeof UPoppover> = {
     template: `
       <div class="story-popover-page">
         <div class="story-popover-inner">
+          <UPoppover v-bind="args">
+            <UButton type="primary">
+              {{ args.trigger === 'click' ? '点击触发' : '悬停触发' }}
+            </UButton>
+          </UPoppover>
           <div
             v-for="n in 8"
             :key="'top-' + n"
@@ -38,17 +43,16 @@ const meta: Meta<typeof UPoppover> = {
           >
             上方占位 {{ n }}
           </div>
-
           <UPoppover v-bind="args">
             <UButton type="primary">
               {{ args.trigger === 'click' ? '点击触发' : '悬停触发' }}
             </UButton>
-          </UPoppover>
-
-          <UPoppover v-bind="args">
-            <UButton type="primary">
-              {{ args.trigger === 'click' ? '点击触发' : '悬停触发' }}
-            </UButton>
+            <template #content>
+              <input />
+              <input />
+              <input />
+              <input />
+            </template>
           </UPoppover>
 
           <div

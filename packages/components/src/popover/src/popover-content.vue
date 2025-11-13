@@ -17,18 +17,31 @@
 
 <script setup lang="ts">
 import { ComputedRef, inject, nextTick, onBeforeUnmount, onMounted, ref, Ref, useTemplateRef, watch } from 'vue'
-import { placementType } from './popover'
+import { placementType, triggerType } from './popover'
+import { useFocusTrap } from './useFocusTrap'
 
 const isShowPop = inject<Ref<boolean>>('isShowPop')!
 const placement = inject<ComputedRef<placementType>>('placement')!
+const trigger = inject<ComputedRef<triggerType>>('trigger')!
 const triggerEl = inject<Ref<HTMLElement | null>>('triggerEl', ref(null))
 const onContentMouseEnter = inject<() => void>('onContentMouseEnter', () => {})
 const onContentMouseLeave = inject<() => void>('onContentMouseLeave', () => {})
 
 const contentPos = ref<{ top: number; left: number }>({ top: 0, left: 0 })
 const contentEl = useTemplateRef('popContent') // ������dom
+const providedContentEl = inject<Ref<HTMLElement | null> | null>('contentEl', null)
 const isClient = typeof window !== 'undefined'
 const POSITION_EPSILON = 0.5
+
+watch(
+  () => contentEl.value,
+  (el) => {
+    if (providedContentEl) {
+      providedContentEl.value = el
+    }
+  },
+  { immediate: true }
+)
 
 const handleAutoPosition = (customPlacement?: placementType) => {
   if (!isShowPop.value || !triggerEl.value) return
@@ -88,15 +101,22 @@ const startFrameTracking = () => {
   rafId = window.requestAnimationFrame(trackTriggerPosition)
 }
 
+let activate: () => void, deactivate: () => void
+
+
+
 watch(
   () => isShowPop.value,
   async (show) => {
     if (show) {
       await nextTick() 
       calcContentPos(placement.value || 'bottom')
-      startFrameTracking()
+      startFrameTracking();
+      ({ activate, deactivate } = useFocusTrap(contentEl.value as HTMLElement, { visible: isShowPop, trigger }));
+      activate()
     } else {
       stopFrameTracking()
+      deactivate()
     }
   }
 )
@@ -155,8 +175,8 @@ function calcContentPos(val: placementType) {
   const triggerDomRect = triggerEl.value?.getBoundingClientRect()
   const contentDomRect = contentEl.value?.getBoundingClientRect()
 
-  if (!triggerDomRect) return console.log('û�д�����')
-  if (!contentDomRect) return console.log('û�е�����')
+  if (!triggerDomRect) return console.log('触发器dom不存在')
+  if (!contentDomRect) return console.log('弹出层dom不存在')
   const { width: tWidth, height: tHeight } = triggerDomRect
   const { width: cWidth, height: cHeight } = contentDomRect
 
@@ -196,5 +216,6 @@ function calcContentPos(val: placementType) {
   padding: 8px;
   width: 200px;
   height: 200px;
+  pointer-events: all;
 }
 </style>
