@@ -1,9 +1,10 @@
-import { Ref } from "vue";
+import { Ref } from 'vue'
+import type { triggerType } from './popover'
 
 interface PopoverStates {
-  visible: Ref<Boolean>
-  trigger: Ref<'click' | 'hover'>
-} 
+  visible: Ref<boolean>
+  trigger: Ref<triggerType>
+}
 
 
 /**

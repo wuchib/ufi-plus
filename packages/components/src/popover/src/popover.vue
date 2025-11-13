@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, provide, ref, useTemplateRef } from 'vue'
 import PopoverContent from './popover-content.vue'
-import { PopoverProps } from './popover'
+import { PopoverContext, PopoverProps, popoverContextKey } from './popover'
 
 const props = withDefaults(defineProps<PopoverProps>(), {
   trigger: 'hover',
@@ -22,8 +22,8 @@ const triggerEl = ref<HTMLElement | null>(null)
 const contentEl = ref<HTMLElement | null>(null)
 const isShowPop = ref(false)
 
-const placement = computed(() => props.placement || 'top')
-const trigger = computed(() => props.trigger || 'top')
+const placement = computed(() => props.placement ?? 'bottom')
+const trigger = computed(() => props.trigger ?? 'hover')
 
 let hideTimer: ReturnType<typeof window.setTimeout> | null = null
 
@@ -39,6 +39,11 @@ const showPopover = () => {
   isShowPop.value = true
 }
 
+const hidePopover = () => {
+  clearHideTimer()
+  isShowPop.value = false
+}
+
 const hidePopoverWithDelay = () => {
   clearHideTimer()
   hideTimer = window.setTimeout(() => {
@@ -47,40 +52,44 @@ const hidePopoverWithDelay = () => {
   }, 150)
 }
 
-const handleTriggerMouseEnter = () => {
-  if (props.trigger !== 'hover') return
-  showPopover()
-}
-
-const handleTriggerMouseLeave = () => {
-  if (props.trigger !== 'hover') return
-  hidePopoverWithDelay()
-}
-
-const handleTriggerClick = () => {
-  if (props.trigger !== 'click') return
+const togglePopover = () => {
   clearHideTimer()
   isShowPop.value = !isShowPop.value
 }
 
+const handleTriggerMouseEnter = () => {
+  if (trigger.value !== 'hover') return
+  showPopover()
+}
+
+const handleTriggerMouseLeave = () => {
+  if (trigger.value !== 'hover') return
+  hidePopoverWithDelay()
+}
+
+const handleTriggerClick = () => {
+  if (trigger.value !== 'click') return
+  togglePopover()
+}
+
 const handleContentMouseEnter = () => {
-  if (props.trigger !== 'hover') return
+  if (trigger.value !== 'hover') return
   showPopover()
 }
 
 const handleContentMouseLeave = () => {
-  if (props.trigger !== 'hover') return
+  if (trigger.value !== 'hover') return
   hidePopoverWithDelay()
 }
 
 const handleDocumentClick = (event: MouseEvent) => {
-  if (props.trigger !== 'click') return
+  if (trigger.value !== 'click') return
   const target = event.target as Node | null
   console.log(target); // todo 不足：注册了几个组件就触发了几次，待优化
-  const trigger = triggerEl.value
+  const triggerNode = triggerEl.value
   const content = contentEl.value
-  if (!target || !trigger) return
-  if (trigger.contains(target)) return
+  if (!target || !triggerNode) return
+  if (triggerNode.contains(target)) return
   if (content?.contains(target)) return
   isShowPop.value = false
 }
@@ -102,7 +111,7 @@ const unregisterTriggerEvent = () => {
 onMounted(() => {
   triggerEl.value = popoverWrapRef.value?.firstElementChild as HTMLElement | null
   registerTriggerEvent()
-  if (props.trigger === 'click') {
+  if (trigger.value === 'click') {
     document.addEventListener('click', handleDocumentClick, true)
   }
 })
@@ -110,18 +119,26 @@ onMounted(() => {
 onUnmounted(() => {
   unregisterTriggerEvent()
   clearHideTimer()
-  if (props.trigger === 'click') {
+  if (trigger.value === 'click') {
     document.removeEventListener('click', handleDocumentClick, true)
   }
 })
 
-provide('isShowPop', isShowPop)
-provide('placement', placement)
-provide('trigger', trigger)
-provide('triggerEl', triggerEl)
-provide('contentEl', contentEl)
-provide('onContentMouseEnter', handleContentMouseEnter)
-provide('onContentMouseLeave', handleContentMouseLeave)
+const context: PopoverContext = {
+  isOpen: isShowPop,
+  trigger,
+  placement,
+  triggerEl,
+  contentEl,
+  show: showPopover,
+  hide: hidePopover,
+  hideWithDelay: hidePopoverWithDelay,
+  toggle: togglePopover,
+  onContentMouseEnter: handleContentMouseEnter,
+  onContentMouseLeave: handleContentMouseLeave,
+}
+
+provide(popoverContextKey, context)
 </script>
 
 <style scoped>
