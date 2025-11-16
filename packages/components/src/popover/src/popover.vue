@@ -46,7 +46,7 @@ const hidePopover = () => {
 
 const hidePopoverWithDelay = () => {
   clearHideTimer()
-  hideTimer = window.setTimeout(() => {
+  hideTimer = setTimeout(() => {
     isShowPop.value = false
     hideTimer = null
   }, 150)
@@ -85,7 +85,7 @@ const handleContentMouseLeave = () => {
 const handleDocumentClick = (event: MouseEvent) => {
   if (trigger.value !== 'click') return
   const target = event.target as Node | null
-  console.log(target); // todo 不足：注册了几个组件就触发了几次，待优化
+  // console.log(target); // todo 不足：注册了几个组件就触发了几次，待优化
   const triggerNode = triggerEl.value
   const content = contentEl.value
   if (!target || !triggerNode) return

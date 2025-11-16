@@ -1,16 +1,9 @@
 ﻿<template>
   <teleport :to="POPOVER_ROOT_SELECTOR">
     <Transition name="ufi-popover-motion" appear>
-      <div
-        v-if="isShowPop"
-        ref="popContent"
-        class="ufi-popover-content"
-        :style="{ top: contentPos.top + 'px', left: contentPos.left + 'px' }"
-        :data-placement="currentPlacement"
-        :data-align="currentAlign"
-        @mouseenter="onContentMouseEnter"
-        @mouseleave="onContentMouseLeave"
-      >
+      <div v-if="isShowPop" ref="popContent" class="ufi-popover-content"
+        :style="{ top: contentPos.top + 'px', left: contentPos.left + 'px' }" :data-placement="currentPlacement"
+        :data-align="currentAlign" @mouseenter="onContentMouseEnter" @mouseleave="onContentMouseLeave">
         这是弹出框
         <slot />
       </div>
@@ -96,7 +89,7 @@ watch(
 
 type RectSnapshot = { top: number; left: number; width: number; height: number }
 let rafId: number | null = null
-let lastRect: RectSnapshot | null = null 
+let lastRect: RectSnapshot | null = null
 
 
 const rectChanged = (prev: RectSnapshot, next: RectSnapshot) =>
@@ -217,12 +210,20 @@ const TRIGGER_GAP = 4
  */
 function calcContentPos(val: placementType) {
   const triggerDomRect = triggerEl.value?.getBoundingClientRect()
-  const contentDomRect = contentEl.value?.getBoundingClientRect()
+  const contentDom = contentEl.value
 
-  if (!triggerDomRect) return
-  if (!contentDomRect) return
-  const { width: tWidth, height: tHeight } = triggerDomRect
-  const { width: cWidth, height: cHeight } = contentDomRect
+  if (!triggerDomRect || !contentDom) return
+  // const { width: tWidth, height: tHeight } = triggerDomRect
+  // if (!triggerDomRect) return
+  // if (!contentDomRect) return
+  // const { width: tWidth, height: tHeight } = triggerDomRect
+  // const { width: cWidth, height: cHeight } = contentDomRect
+
+  // 使用 offset 尺寸，避免入场过渡的 transform 缩放影响初次测量
+  const cWidth = contentDom.offsetWidth
+  const cHeight = contentDom.offsetHeight 
+  const tWidth = (triggerEl.value as HTMLElement).offsetWidth 
+  const tHeight = (triggerEl.value as HTMLElement).offsetHeight 
 
   const [basePlacement, rawAlign] = val.split('-') as [BasePlacement, PlacementAlign?]
   const align: PlacementAlign = rawAlign ?? 'center'

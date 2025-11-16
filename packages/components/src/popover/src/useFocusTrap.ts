@@ -38,11 +38,6 @@ export function useFocusTrap(dialogEl: HTMLElement, states: PopoverStates) {
   };
 
   const handleKeydown = (e: KeyboardEvent) => {
-    if(e.key === "Escape"){
-      // 控制状态改变
-      states.visible.value = false
-      return
-    }
     if (e.key !== "Tab") return;
 
     const focusable = getFocusable();
@@ -87,7 +82,7 @@ export function useFocusTrap(dialogEl: HTMLElement, states: PopoverStates) {
 
   const deactivate = () => {
     document.removeEventListener("keydown", handleKeydown);
-    lastFocusedEl?.focus(); // 恢复之前焦点
+    // lastFocusedEl?.focus(); // 恢复之前焦点
   };
 
   return { activate, deactivate };

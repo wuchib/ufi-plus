@@ -4,18 +4,18 @@ import { UPoppover, UButton } from '@ufi-plus/components'
 import './popover.stories.css'
 
 const placementOptions = [
-  'top',
-  'top-start',
-  'top-end',
+  'right',
   'bottom',
   'bottom-start',
-  'bottom-end',
   'left',
-  'left-start',
-  'left-end',
-  'right',
   'right-start',
+  'bottom-end',
+  'top-end',
+  'left-start',
   'right-end',
+  'top',
+  'top-start',
+  'left-end',
 ]
 
 const meta: Meta<typeof UPoppover> = {
