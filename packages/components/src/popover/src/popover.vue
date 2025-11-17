@@ -8,19 +8,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, provide, ref, useTemplateRef } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref, useTemplateRef, watch } from 'vue'
 import PopoverContent from './popover-content.vue'
-import { PopoverContext, PopoverProps, popoverContextKey } from './popover'
+import { PopoverContext, PopoverProps, popoverContextKey, PopoverEmits } from './popover'
 
 const props = withDefaults(defineProps<PopoverProps>(), {
   trigger: 'hover',
   placement: 'bottom',
+  visible: undefined // 若传入 visible ， 则弹窗的显隐由该属性控制 
 })
+
+const emit = defineEmits<PopoverEmits>()
 
 const popoverWrapRef = useTemplateRef('popover')
 const triggerEl = ref<HTMLElement | null>(null)
 const contentEl = ref<HTMLElement | null>(null)
-const isShowPop = ref(false)
+const innerVisible = ref(props.visible ?? false)
+const isControlled = computed(() => props.visible !== undefined)
+const isShowPop = computed(() => (isControlled.value ? !!props.visible : innerVisible.value))
 
 const placement = computed(() => props.placement ?? 'bottom')
 const trigger = computed(() => props.trigger ?? 'hover')
@@ -34,27 +39,34 @@ const clearHideTimer = () => {
   }
 }
 
-const showPopover = () => {
+const setVisible = (value: boolean) => {
   clearHideTimer()
-  isShowPop.value = true
+  if (value === isShowPop.value) return
+  if (!isControlled.value) {
+    innerVisible.value = value
+  }
+  emit('update:visible', value)
+}
+
+const showPopover = () => {
+  setVisible(true)
 }
 
 const hidePopover = () => {
-  clearHideTimer()
-  isShowPop.value = false
+  setVisible(false)
 }
 
 const hidePopoverWithDelay = () => {
   clearHideTimer()
   hideTimer = setTimeout(() => {
-    isShowPop.value = false
+    setVisible(false)
     hideTimer = null
   }, 150)
 }
 
 const togglePopover = () => {
   clearHideTimer()
-  isShowPop.value = !isShowPop.value
+  setVisible(!isShowPop.value)
 }
 
 const handleTriggerMouseEnter = () => {
@@ -91,7 +103,7 @@ const handleDocumentClick = (event: MouseEvent) => {
   if (!target || !triggerNode) return
   if (triggerNode.contains(target)) return
   if (content?.contains(target)) return
-  isShowPop.value = false
+  setVisible(false)
 }
 
 const registerTriggerEvent = () => {
@@ -115,6 +127,15 @@ onMounted(() => {
     document.addEventListener('click', handleDocumentClick, true)
   }
 })
+
+watch(
+  () => props.visible,
+  (val) => {
+    if (val !== undefined) {
+      innerVisible.value = val
+    }
+  }
+)
 
 onUnmounted(() => {
   unregisterTriggerEvent()
@@ -142,6 +163,5 @@ provide(popoverContextKey, context)
 </script>
 
 <style scoped>
-.ufi-popover {
-}
+.ufi-popover {}
 </style>

@@ -91,6 +91,7 @@ export const PopBasic: Story = {
   args: {
     trigger: 'hover',
     placement: 'top',
+    visible: true
   },
 }
 

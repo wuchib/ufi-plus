@@ -4,7 +4,7 @@
       <div v-if="isShowPop" ref="popContent" class="ufi-popover-content"
         :style="{ top: contentPos.top + 'px', left: contentPos.left + 'px' }" :data-placement="currentPlacement"
         :data-align="currentAlign" @mouseenter="onContentMouseEnter" @mouseleave="onContentMouseLeave">
-        这是弹出框
+        <!-- 这是弹出框 -->
         <slot />
       </div>
     </Transition>
@@ -140,7 +140,7 @@ watch(
   () => isShowPop.value,
   async (show) => {
     if (show) {
-      await nextTick() 
+      await nextTick()
       calcContentPos(placement.value || 'bottom')
       startFrameTracking();
       ({ activate, deactivate } = useFocusTrap(contentEl.value as HTMLElement, { visible: isShowPop, trigger }));
@@ -221,9 +221,9 @@ function calcContentPos(val: placementType) {
 
   // 使用 offset 尺寸，避免入场过渡的 transform 缩放影响初次测量
   const cWidth = contentDom.offsetWidth
-  const cHeight = contentDom.offsetHeight 
-  const tWidth = (triggerEl.value as HTMLElement).offsetWidth 
-  const tHeight = (triggerEl.value as HTMLElement).offsetHeight 
+  const cHeight = contentDom.offsetHeight
+  const tWidth = (triggerEl.value as HTMLElement).offsetWidth
+  const tHeight = (triggerEl.value as HTMLElement).offsetHeight
 
   const [basePlacement, rawAlign] = val.split('-') as [BasePlacement, PlacementAlign?]
   const align: PlacementAlign = rawAlign ?? 'center'

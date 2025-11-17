@@ -15,15 +15,16 @@ export type placementType =
   | 'right-end'
 export type triggerType = 'click' | 'hover'
 
-export const popoverEmits = {}
-
 
 
 export type PopoverProps = {
   trigger?: triggerType
   placement?: placementType
+  visible?: boolean
 }
-export type PopoverEmits = typeof popoverEmits
+export type PopoverEmits = {
+  (e: 'update:visible', value: boolean): void
+}
 
 export type PopoverContext = {
   isOpen: Ref<boolean>
