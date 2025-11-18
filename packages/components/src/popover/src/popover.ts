@@ -20,7 +20,8 @@ export type triggerType = 'click' | 'hover'
 export type PopoverProps = {
   trigger?: triggerType
   placement?: placementType
-  visible?: boolean
+  visible?: boolean,
+  showArrow?: boolean
 }
 export type PopoverEmits = {
   (e: 'update:visible', value: boolean): void
@@ -30,8 +31,10 @@ export type PopoverContext = {
   isOpen: Ref<boolean>
   trigger: ComputedRef<triggerType>
   placement: ComputedRef<placementType>
+  showArrow: ComputedRef<boolean>
   triggerEl: Ref<HTMLElement | null>
   contentEl: Ref<HTMLElement | null>
+  arrowEl: Ref<HTMLElement | null>
   show: () => void
   hide: () => void
   hideWithDelay: () => void

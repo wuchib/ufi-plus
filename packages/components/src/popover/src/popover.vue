@@ -15,7 +15,8 @@ import { PopoverContext, PopoverProps, popoverContextKey, PopoverEmits } from '.
 const props = withDefaults(defineProps<PopoverProps>(), {
   trigger: 'hover',
   placement: 'bottom',
-  visible: undefined // 若传入 visible ， 则弹窗的显隐由该属性控制 
+  visible: undefined, // 若传入 visible ， 则弹窗的显隐由该属性控制 
+  showArrow: true
 })
 
 const emit = defineEmits<PopoverEmits>()
@@ -23,12 +24,14 @@ const emit = defineEmits<PopoverEmits>()
 const popoverWrapRef = useTemplateRef('popover')
 const triggerEl = ref<HTMLElement | null>(null)
 const contentEl = ref<HTMLElement | null>(null)
+const arrowEl = ref<HTMLElement | null>(null)
 const innerVisible = ref(props.visible ?? false)
 const isControlled = computed(() => props.visible !== undefined)
 const isShowPop = computed(() => (isControlled.value ? !!props.visible : innerVisible.value))
 
 const placement = computed(() => props.placement ?? 'bottom')
 const trigger = computed(() => props.trigger ?? 'hover')
+const showArrow = computed(()=> props.showArrow)
 
 let hideTimer: ReturnType<typeof window.setTimeout> | null = null
 
@@ -149,8 +152,10 @@ const context: PopoverContext = {
   isOpen: isShowPop,
   trigger,
   placement,
+  showArrow,
   triggerEl,
   contentEl,
+  arrowEl,
   show: showPopover,
   hide: hidePopover,
   hideWithDelay: hidePopoverWithDelay,

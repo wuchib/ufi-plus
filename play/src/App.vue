@@ -13,13 +13,24 @@ const visible = ref(false)
     <UButton type="warning" plain>Warning</UButton> -->
     <button @click="visible = !visible">点击切换显隐</button>
     <hr>
-    <UPoppover trigger="click" placement="right">
+    <div class="test">
+    <UPoppover trigger="click" placement="bottom-end">
       <UButton type="primary" >Primary</UButton>
       <template #content>
         123456789
       </template>
     </UPoppover>
+    </div>
     
 
   </div>
 </template>
+
+<style>
+.test{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 600px;
+}
+</style>
