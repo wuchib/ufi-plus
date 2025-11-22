@@ -14,23 +14,49 @@ const visible = ref(false)
     <button @click="visible = !visible">点击切换显隐</button>
     <hr>
     <div class="test">
-    <UPoppover trigger="click" placement="bottom-end">
-      <UButton type="primary" >Primary</UButton>
-      <template #content>
-        123456789
-      </template>
-    </UPoppover>
+      <!-- <UPoppover trigger="click" placement="left">
+        <UButton type="primary">Primary</UButton>
+        <template #content>
+          Naive UI 是一个 Vue3 的组件库。
+          要了解如何安装，参见安装。
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+        </template>
+      </UPoppover> -->
+
+      <UPoppover trigger="click" show-arrow pop-class="customClass">
+        <UButton type="primary">Primary</UButton>
+        <template #content>
+          Naive UI 是一个 Vue3 的组件库。
+          要了解如何安装，参见安装。
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+          它比较完整，主题可调，用 TypeScript 写的，快
+        </template>
+      </UPoppover>
     </div>
-    
+
 
   </div>
 </template>
 
 <style>
-.test{
+.test {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 600px;
+}
+.customClass{
+  width: 100px;
 }
 </style>

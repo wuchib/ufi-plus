@@ -32,6 +32,7 @@ const isShowPop = computed(() => (isControlled.value ? !!props.visible : innerVi
 const placement = computed(() => props.placement ?? 'bottom')
 const trigger = computed(() => props.trigger ?? 'hover')
 const showArrow = computed(()=> props.showArrow)
+const popClass = computed(() => props.popClass ?? '')
 
 let hideTimer: ReturnType<typeof window.setTimeout> | null = null
 
@@ -47,8 +48,8 @@ const setVisible = (value: boolean) => {
   if (value === isShowPop.value) return
   if (!isControlled.value) {
     innerVisible.value = value
+    emit('update:visible', value)
   }
-  emit('update:visible', value)
 }
 
 const showPopover = () => {
@@ -156,6 +157,7 @@ const context: PopoverContext = {
   triggerEl,
   contentEl,
   arrowEl,
+  popClass,
   show: showPopover,
   hide: hidePopover,
   hideWithDelay: hidePopoverWithDelay,

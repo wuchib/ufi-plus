@@ -4,7 +4,7 @@
       <div 
         v-if="isShowPop" 
         ref="popContent" 
-        class="ufi-popover-content"
+        :class="['ufi-popover-content']"
         :style="{ top: contentPos.top + 'px', left: contentPos.left + 'px' }" 
         :data-placement="currentPlacement"
         :data-align="currentAlign" 
@@ -19,13 +19,15 @@
           :class="[ arrowOrientationClass ]"
           :style="{
             ...arrowPositionStyle,
-            width: TRIGGER_GAP + 'px',
-            height: TRIGGER_GAP + 'px'
+            width: triggerGap + 'px',
+            height: triggerGap + 'px'
           }"
         >
         </div>
         <!-- 这是弹出框 -->
-        <slot />
+        <div :class="['ufi-popover-content__inner', popClass]">
+          <slot />
+        </div>
       </div>
     </Transition>
   </teleport>
@@ -33,8 +35,11 @@
 
 <script setup lang="ts">
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue'
-import { PopoverContext, placementType, popoverContextKey } from './popover'
+import { PopoverContext, placementType, popoverContextKey, BasePlacement, PlacementAlign, ContentPos, ArrowPosition } from './popover'
 import { useFocusTrap } from './useFocusTrap'
+import { TRIGGER_GAP } from './config'
+
+import { calcContentPos } from './utils'
 
 const popover = inject(popoverContextKey) as PopoverContext | undefined
 if (!popover) {
@@ -46,14 +51,15 @@ const {
   placement,
   trigger,
   showArrow,
+  popClass,
   triggerEl,
   contentEl: providedContentEl,
   arrowEl: providedArrowEl,
   onContentMouseEnter,
-  onContentMouseLeave
+  onContentMouseLeave,
 } = popover
 
-const contentPos = ref<{ top: number; left: number }>({ top: 0, left: 0 })
+const contentPos = ref<ContentPos>({ top: 0, left: 0 })
 const currentPlacement = ref<BasePlacement>('bottom')
 const currentAlign = ref<PlacementAlign>('center')
 const contentEl = useTemplateRef('popContent') // 弹出层 dom 引用
@@ -63,15 +69,8 @@ const POPOVER_ROOT_ID = 'ufi-popover-root'
 const POPOVER_ROOT_SELECTOR = `#${POPOVER_ROOT_ID}`
 
 
-interface ArrowPosition {
-  left: number | undefined,
-  top: number | undefined,
-  right: number | undefined,
-  bottom: number | undefined,
-}
-
 // 箭头位置
-const arrowPosition = reactive<ArrowPosition>({
+const arrowPosition = ref<ArrowPosition>({
   left: void 0,
   top: void 0,
   right: void 0,
@@ -88,10 +87,10 @@ const arrowOrientationClass = computed(()=>{
  */
 const arrowPositionStyle = computed(()=>{
   const styleRes: Partial<Record<'left' | 'top' | 'right' | 'bottom', string>> = {}
-  for( const k in arrowPosition){
+  for( const k in arrowPosition.value){
     const key = k as keyof ArrowPosition
-    if(arrowPosition[key] !== undefined){
-      styleRes[key] = arrowPosition[key] + 'px'
+    if(arrowPosition.value[key] !== undefined){
+      styleRes[key] = arrowPosition.value[key] + 'px'
     }
   }
   return styleRes
@@ -124,16 +123,7 @@ if (isClient) {
   ensurePopoverRoot()
 }
 const POSITION_EPSILON = ref(0.5)
-type BasePlacement = 'top' | 'bottom' | 'left' | 'right'
-type PlacementAlign = 'start' | 'end' | 'center'
 
-// watch(
-//   () => contentEl.value,
-//   (el) => {
-//     providedContentEl.value = el
-//   },
-//   { immediate: true }
-// )
 
 watchEffect(()=>{
   providedContentEl.value = contentEl.value
@@ -142,7 +132,16 @@ watchEffect(()=>{
 
 const handleAutoPosition = (customPlacement?: placementType) => {
   if (!isShowPop.value || !triggerEl.value) return
-  calcContentPos(customPlacement || placement.value || 'bottom')
+  calcContentPos(
+    customPlacement || placement.value || 'bottom',
+    triggerEl.value,
+    contentEl.value,
+    arrowEl.value,
+    contentPos,
+    currentPlacement,
+    currentAlign,
+    arrowPosition
+  )
 }
 
 watch(
@@ -207,7 +206,16 @@ watch(
   async (show) => {
     if (show) {
       await nextTick()
-      calcContentPos(placement.value || 'bottom')
+      calcContentPos(
+        placement.value || 'bottom',
+        triggerEl.value,
+        contentEl.value,
+        arrowEl.value,
+        contentPos,
+        currentPlacement,
+        currentAlign,
+        arrowPosition
+      )
       startFrameTracking();
       ({ activate, deactivate } = useFocusTrap(contentEl.value as HTMLElement, { visible: isShowPop, trigger }));
       activate()
@@ -222,8 +230,10 @@ const windowEventHandler = () => {
   handleAutoPosition()
 }
 
-let resizeObserver: ResizeObserver | null = null // 监听器
+let resizeObserver: ResizeObserver | null = null
 let observedTrigger: HTMLElement | null = null
+let contentResizeObserver: ResizeObserver | null = null
+let observedContent: HTMLElement | null = null
 
 const stopObservingTrigger = () => {
   if (resizeObserver && observedTrigger) {
@@ -239,14 +249,41 @@ const ensureResizeObserver = () => {
   })
 }
 
+const stopObservingContent = () => {
+  if (contentResizeObserver && observedContent) {
+    contentResizeObserver.unobserve(observedContent)
+  }
+  observedContent = null
+}
+
+const ensureContentObserver = () => {
+  if (contentResizeObserver || !isClient || typeof ResizeObserver === 'undefined') return
+  contentResizeObserver = new ResizeObserver(() => {
+    handleAutoPosition()
+  })
+}
+
 watch(
   triggerEl,
   (el) => {
-    stopObservingTrigger()
+    // stopObservingTrigger()
     if (!el) return
-    ensureResizeObserver()
+    // ensureResizeObserver()
     resizeObserver?.observe(el)
     observedTrigger = el
+    handleAutoPosition()
+  },
+  { immediate: true }
+)
+
+watch(
+  contentEl,
+  (el) => {
+    stopObservingContent()
+    if (!el) return
+    ensureContentObserver()
+    contentResizeObserver?.observe(el)
+    observedContent = el
     handleAutoPosition()
   },
   { immediate: true }
@@ -265,142 +302,14 @@ onBeforeUnmount(() => {
   }
   resizeObserver?.disconnect()
   observedTrigger = null
+  contentResizeObserver?.disconnect()
+  observedContent = null
   stopFrameTracking()
 })
 
-const TRIGGER_GAP = ref(4)
+const triggerGap = ref(TRIGGER_GAP)
 
-/**
- * 计算弹出层位置
- * @param val 
- */
-function calcContentPos(val: placementType) {
-  const triggerDomRect = triggerEl.value?.getBoundingClientRect()
-  const contentDom = contentEl.value
 
-  if (!triggerDomRect || !contentDom) return
-  // const { width: tWidth, height: tHeight } = triggerDomRect
-  // if (!triggerDomRect) return
-  // if (!contentDomRect) return
-  // const { width: tWidth, height: tHeight } = triggerDomRect
-  // const { width: cWidth, height: cHeight } = contentDomRect
-
-  // 使用 offset 尺寸，避免入场过渡的 transform 缩放影响初次测量
-  const cWidth = contentDom.offsetWidth
-  const cHeight = contentDom.offsetHeight
-  const tWidth = (triggerEl.value as HTMLElement).offsetWidth
-  const tHeight = (triggerEl.value as HTMLElement).offsetHeight
-
-  // 箭头的宽高
-  const arrowWidth = (arrowEl.value as HTMLElement).offsetWidth
-  const arrowHeight = (arrowEl.value as HTMLElement).offsetHeight
-
-  console.log(arrowWidth, arrowHeight, 'cbiu cbiu');
-  
-
-  const [basePlacement, rawAlign] = val.split('-') as [BasePlacement, PlacementAlign?]
-  const align: PlacementAlign = rawAlign ?? 'center'
-  // 记录视口尺寸，方便判断剩余空间
-  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : document.documentElement.clientWidth
-  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : document.documentElement.clientHeight
-  
-  // 定义相反方向，用于空间不足时兜底
-  const oppositePlacement: Record<BasePlacement, BasePlacement> = {
-    top: 'bottom',
-    bottom: 'top',
-    left: 'right',
-    right: 'left'
-  }
-
-  // 检查某个方向是否有足够空间容纳弹层
-  const canFit = (placement: BasePlacement) => {
-    switch (placement) {
-      case 'top':
-        return triggerDomRect.top >= cHeight
-      case 'bottom':
-        return viewportHeight - triggerDomRect.bottom >= cHeight
-      case 'left':
-        return triggerDomRect.left >= cWidth
-      case 'right':
-        return viewportWidth - triggerDomRect.right >= cWidth
-      default:
-        return true
-    }
-  }
-
-  // 决定最终方向：优先原始方向，不行再尝试相反方向
-  const resolvedPlacement: BasePlacement = (() => {
-    if (canFit(basePlacement)) return basePlacement
-    const fallback = oppositePlacement[basePlacement]
-    return fallback && canFit(fallback) ? fallback : basePlacement
-  })()
-  currentPlacement.value = resolvedPlacement
-  currentAlign.value = align
-
-  if (resolvedPlacement === 'top') {
-    contentPos.value.top = triggerDomRect.top - cHeight - TRIGGER_GAP.value
-    arrowPosition.bottom = - arrowHeight / 2
-    console.log(arrowPosition.bottom);
-    if (align === 'start') {
-      contentPos.value.left = triggerDomRect.left
-      arrowPosition.left = tWidth / 2 - arrowWidth / 2
-    } else if (align === 'end') {
-      contentPos.value.left = triggerDomRect.right - cWidth
-      arrowPosition.right = tWidth / 2 - arrowWidth / 2
-    } else {
-      contentPos.value.left = triggerDomRect.left + (tWidth - cWidth) / 2
-      arrowPosition.left = cWidth / 2 - arrowWidth / 2
-    }
-    return
-  }
-
-  if (resolvedPlacement === 'bottom') {
-    contentPos.value.top = triggerDomRect.bottom + TRIGGER_GAP.value
-    arrowPosition.top = - arrowHeight / 2
-    if (align === 'start') {
-      contentPos.value.left = triggerDomRect.left
-      arrowPosition.left = tWidth / 2 - arrowWidth / 2
-    } else if (align === 'end') {
-      contentPos.value.left = triggerDomRect.right - cWidth
-      arrowPosition.right = tWidth / 2 - arrowWidth / 2
-    } else {
-      contentPos.value.left = triggerDomRect.left + (tWidth - cWidth) / 2
-      arrowPosition.left = cWidth / 2 - arrowWidth / 2
-    }
-    return
-  }
-
-  if (resolvedPlacement === 'left') {
-    contentPos.value.left = triggerDomRect.left - cWidth - TRIGGER_GAP.value
-    arrowPosition.right = - arrowWidth / 2
-    if (align === 'start') {
-      contentPos.value.top = triggerDomRect.top
-      arrowPosition.top = tHeight / 2 - arrowHeight / 2
-    } else if (align === 'end') {
-      contentPos.value.top = triggerDomRect.bottom - cHeight
-      arrowPosition.bottom = tHeight / 2 - arrowHeight / 2
-    } else {
-      contentPos.value.top = triggerDomRect.top + (tHeight - cHeight) / 2
-      arrowPosition.top = cHeight / 2 - arrowHeight / 2
-    }
-    return
-  }
-
-  if (resolvedPlacement === 'right') {
-    contentPos.value.left = triggerDomRect.right + TRIGGER_GAP.value
-    arrowPosition.left = - arrowWidth / 2
-    if (align === 'start') {
-      contentPos.value.top = triggerDomRect.top
-      arrowPosition.top = tHeight / 2 - arrowHeight / 2
-    } else if (align === 'end') {
-      contentPos.value.top = triggerDomRect.bottom - cHeight
-      arrowPosition.bottom = tHeight / 2 - arrowHeight / 2
-    } else {
-      contentPos.value.top = triggerDomRect.top + (tHeight - cHeight) / 2
-      arrowPosition.top = cHeight / 2 - arrowHeight / 2
-    }
-  }
-}
 
 </script>
 
@@ -411,13 +320,18 @@ function calcContentPos(val: placementType) {
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 8px;
-  padding: 8px;
-  width: 200px;
-  height: 200px;
+  box-sizing: border-box;
   pointer-events: all;
+  padding: 4px;
   --ufi-motion-x: 0px;
   --ufi-motion-y: 0px;
   --ufi-motion-scale: 0.94;
+}
+
+.ufi-popover-content__inner{
+  white-space: normal;
+  word-break: break-word;
+  border-radius: 8px;
 }
 
 /* 箭头样式 */
