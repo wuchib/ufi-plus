@@ -106,7 +106,8 @@ const ensurePopoverRoot = () => {
     root = document.createElement('div')
     root.id = POPOVER_ROOT_ID
     Object.assign(root.style, {
-      position: 'fixed',
+      // position: 'fixed',
+      position: 'absolute',
       zIndex: '9999',
       pointerEvents: 'none',
       left: '0',
@@ -172,29 +173,9 @@ const stopFrameTracking = () => {
   lastRect = null
 }
 
-const trackTriggerPosition = () => {
-  if (!isClient || !isShowPop.value || !triggerEl.value) {
-    stopFrameTracking()
-    return
-  }
-  const rect = triggerEl.value.getBoundingClientRect()
-  const snapshot: RectSnapshot = {
-    top: rect.top,
-    left: rect.left,
-    width: rect.width,
-    height: rect.height
-  }
-  if (!lastRect || rectChanged(lastRect, snapshot)) {
-    lastRect = snapshot
-    handleAutoPosition()
-  }
-  rafId = window.requestAnimationFrame(trackTriggerPosition)
-}
-
 const startFrameTracking = () => {
   if (!isClient) return
   stopFrameTracking()
-  rafId = window.requestAnimationFrame(trackTriggerPosition)
 }
 
 let activate: () => void, deactivate: () => void
@@ -230,24 +211,8 @@ const windowEventHandler = () => {
   handleAutoPosition()
 }
 
-let resizeObserver: ResizeObserver | null = null
-let observedTrigger: HTMLElement | null = null
 let contentResizeObserver: ResizeObserver | null = null
 let observedContent: HTMLElement | null = null
-
-const stopObservingTrigger = () => {
-  if (resizeObserver && observedTrigger) {
-    resizeObserver.unobserve(observedTrigger)
-  }
-  observedTrigger = null
-}
-
-const ensureResizeObserver = () => {
-  if (resizeObserver || !isClient || typeof ResizeObserver === 'undefined') return
-  resizeObserver = new ResizeObserver(() => {
-    handleAutoPosition()
-  })
-}
 
 const stopObservingContent = () => {
   if (contentResizeObserver && observedContent) {
@@ -266,11 +231,7 @@ const ensureContentObserver = () => {
 watch(
   triggerEl,
   (el) => {
-    // stopObservingTrigger()
     if (!el) return
-    // ensureResizeObserver()
-    resizeObserver?.observe(el)
-    observedTrigger = el
     handleAutoPosition()
   },
   { immediate: true }
@@ -291,17 +252,13 @@ watch(
 
 onMounted(() => {
   if (!isClient) return
-  window.addEventListener('scroll', windowEventHandler, true)
   window.addEventListener('resize', windowEventHandler)
 })
 
 onBeforeUnmount(() => {
   if (isClient) {
-    window.removeEventListener('scroll', windowEventHandler, true)
     window.removeEventListener('resize', windowEventHandler)
   }
-  resizeObserver?.disconnect()
-  observedTrigger = null
   contentResizeObserver?.disconnect()
   observedContent = null
   stopFrameTracking()
