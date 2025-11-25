@@ -276,7 +276,7 @@ const triggerGap = ref(TRIGGER_GAP)
   z-index: 1000;
   background-color: #fff;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 2px;
   box-sizing: border-box;
   pointer-events: all;
   padding: 4px;

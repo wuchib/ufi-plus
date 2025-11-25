@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { UButton, UPoppover } from 'ufi-plus'
-import { ref } from 'vue';
 
-const visible = ref(false)
 </script>
 
 <template>
@@ -13,14 +11,6 @@ const visible = ref(false)
         <template #content>
           <div style="font-size: 12px;">
             Naive UI 是一个 Vue3 的组件库。
-          要了解如何安装，参见安装。
-          它比较完整，主题可调，用 TypeScript 写的，快
-          它比较完整，主题可调，用 TypeScript 写的，快
-          它比较完整，主题可调，用 TypeScript 写的，快
-          它比较完整，主题可调，用 TypeScript 写的，快
-          它比较完整，主题可调，用 TypeScript 写的，快
-          它比较完整，主题可调，用 TypeScript 写的，快
-          它比较完整，主题可调，用 TypeScript 写的，快
           </div>
         </template>
       </UPoppover>
@@ -33,12 +23,9 @@ const visible = ref(false)
 <style>
 .test {
   position: absolute;
-  top: 100px;
-  left: 100px;
+  top: 250px;
+  right: 500px;
 }
 .customClass{
-  width: 900px;
-  height: 100px;
-  overflow: auto;
 }
 </style>
