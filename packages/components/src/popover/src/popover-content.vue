@@ -5,7 +5,11 @@
         v-if="isShowPop" 
         ref="popContent" 
         :class="['ufi-popover-content']"
-        :style="{ top: contentPos.top + 'px', left: contentPos.left + 'px' }" 
+        :style="{ 
+          top: contentOffset.top + 'px', 
+          left: contentOffset.left + 'px',
+          position: contentPosition
+        }" 
         :data-placement="currentPlacement"
         :data-align="currentAlign" 
         @mouseenter="onContentMouseEnter" 
@@ -34,12 +38,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch, watchEffect } from 'vue'
-import { PopoverContext, placementType, popoverContextKey, BasePlacement, PlacementAlign, ContentPos, ArrowPosition } from './popover'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch, watchEffect } from 'vue'
+import { PopoverContext, placementType, popoverContextKey, BasePlacement, PlacementAlign, ContentOffset, ArrowPosition } from './popover'
 import { useFocusTrap } from './useFocusTrap'
 import { TRIGGER_GAP } from './config'
 
-import { calcContentPos } from './utils'
+import { calcContentPos, calcOffsetInManual } from './utils'
 
 const popover = inject(popoverContextKey) as PopoverContext | undefined
 if (!popover) {
@@ -57,9 +61,34 @@ const {
   arrowEl: providedArrowEl,
   onContentMouseEnter,
   onContentMouseLeave,
+  x,
+  y
 } = popover
 
-const contentPos = ref<ContentPos>({ top: 0, left: 0 })
+
+watch(()=>isShowPop.value, async val=>{
+  if(!val) return
+  if(triggerEl.value || trigger.value !== 'manual') return
+  await nextTick()
+  calcOffsetInManual(
+    x.value || 0, 
+    y.value || 0,
+    placement.value,
+    contentEl.value,
+    arrowEl.value,
+    contentOffset,
+    arrowPosition
+  )
+})
+
+const contentPosition = computed(()=>{
+  if(trigger.value === 'manual' && triggerEl.value === null) {
+    return 'fixed'
+  }else{
+    return 'absolute'
+  }
+})
+const contentOffset = ref<ContentOffset>({ top: 0, left: 0 })
 const currentPlacement = ref<BasePlacement>('bottom')
 const currentAlign = ref<PlacementAlign>('center')
 const contentEl = useTemplateRef('popContent') // 弹出层 dom 引用
@@ -138,7 +167,7 @@ const handleAutoPosition = (customPlacement?: placementType) => {
     triggerEl.value,
     contentEl.value,
     arrowEl.value,
-    contentPos,
+    contentOffset,
     currentPlacement,
     currentAlign,
     arrowPosition
@@ -192,7 +221,7 @@ watch(
         triggerEl.value,
         contentEl.value,
         arrowEl.value,
-        contentPos,
+        contentOffset,
         currentPlacement,
         currentAlign,
         arrowPosition

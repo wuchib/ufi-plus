@@ -1,6 +1,10 @@
-import { placementType, BasePlacement, PlacementAlign, ContentPos, ArrowPosition } from './popover'
+import { placementType, BasePlacement, PlacementAlign, ContentOffset, ArrowPosition } from './popover'
 import { TRIGGER_GAP } from './config'
 import { Ref } from 'vue'
+
+
+const vWidth = typeof window !== 'undefined' ? window.innerWidth : document.documentElement.clientWidth
+const vHeight = typeof window !== 'undefined' ? window.innerHeight : document.documentElement.clientHeight
 
 /**
  * 计算弹出层位置
@@ -8,7 +12,7 @@ import { Ref } from 'vue'
  * @param triggerEl
  * @param contentEl
  * @param arrowEl
- * @param contentPos
+ * @param contentOffset
  * @param currentPlacement
  * @param currentAlign
  * @param arrowPosition
@@ -19,7 +23,7 @@ export function calcContentPos(
   triggerEl: HTMLElement | null,
   contentEl: HTMLElement | null,
   arrowEl: HTMLElement | null,
-  contentPos: Ref<ContentPos>,
+  contentOffset: Ref<ContentOffset>,
   currentPlacement: Ref<any>,
   currentAlign: Ref<PlacementAlign>,
   arrowPosition: Ref<ArrowPosition>,
@@ -35,15 +39,13 @@ export function calcContentPos(
   const tHeight = (triggerEl as HTMLElement).offsetHeight
 
   // 箭头的宽高
-  const arrowWidth = (arrowEl as HTMLElement).offsetWidth
-  const arrowHeight = (arrowEl as HTMLElement).offsetHeight
+  const arrowWidth = arrowEl?.offsetWidth ?? 0
+  const arrowHeight = arrowEl?.offsetHeight ?? 0
 
   const [basePlacement, rawAlign] = placement.split('-') as [BasePlacement, PlacementAlign?]
 
   let finalP: BasePlacement = basePlacement ?? 'bottom'
   let align: PlacementAlign | '' = rawAlign ?? 'center'
-  const vWidth = typeof window !== 'undefined' ? window.innerWidth : document.documentElement.clientWidth
-  const vHeight = typeof window !== 'undefined' ? window.innerHeight : document.documentElement.clientHeight
 
   const { top, bottom, left, right } = triggerDomRect
 
@@ -127,65 +129,152 @@ export function calcContentPos(
   const bottomWidthWinY = bottom + window.scrollY
 
   if (finalP === 'top') {
-    contentPos.value.top = topWidthWinY - cHeight - TRIGGER_GAP
+    contentOffset.value.top = topWidthWinY - cHeight - TRIGGER_GAP
     arrowPosition.value.bottom = -arrowHeight / 2
     if (align === 'start') {
-      contentPos.value.left = left
+      contentOffset.value.left = left
       arrowPosition.value.left = tWidth / 2 - arrowWidth / 2
     } else if (align === 'end') {
-      contentPos.value.left = right - cWidth
+      contentOffset.value.left = right - cWidth
       arrowPosition.value.right = tWidth / 2 - arrowWidth / 2
     } else {
-      contentPos.value.left = left + (tWidth - cWidth) / 2
+      contentOffset.value.left = left + (tWidth - cWidth) / 2
       arrowPosition.value.left = cWidth / 2 - arrowWidth / 2
     }
     return
   }
 
   if (finalP === 'bottom') {
-    contentPos.value.top = bottomWidthWinY + TRIGGER_GAP
+    contentOffset.value.top = bottomWidthWinY + TRIGGER_GAP
     arrowPosition.value.top = -arrowHeight / 2
     if (align === 'start') {
-      contentPos.value.left = left
+      contentOffset.value.left = left
       arrowPosition.value.left = tWidth / 2 - arrowWidth / 2
     } else if (align === 'end') {
-      contentPos.value.left = right - cWidth
+      contentOffset.value.left = right - cWidth
       arrowPosition.value.right = tWidth / 2 - arrowWidth / 2
     } else {
-      contentPos.value.left = left + (tWidth - cWidth) / 2
+      contentOffset.value.left = left + (tWidth - cWidth) / 2
       arrowPosition.value.left = cWidth / 2 - arrowWidth / 2
     }
     return
   }
 
   if (finalP === 'left') {
-    contentPos.value.left = left - cWidth - TRIGGER_GAP
+    contentOffset.value.left = left - cWidth - TRIGGER_GAP
     arrowPosition.value.right = -arrowWidth / 2
     if (align === 'start') {
-      contentPos.value.top = bottomWidthWinY - cHeight
+      contentOffset.value.top = bottomWidthWinY - cHeight
       arrowPosition.value.top = tHeight / 2 - arrowHeight / 2
     } else if (align === 'end') {
-      contentPos.value.top = topWidthWinY
+      contentOffset.value.top = topWidthWinY
       arrowPosition.value.bottom = tHeight / 2 - arrowHeight / 2
     } else {
-      contentPos.value.top = topWidthWinY + (tHeight - cHeight) / 2
+      contentOffset.value.top = topWidthWinY + (tHeight - cHeight) / 2
       arrowPosition.value.top = cHeight / 2 - arrowHeight / 2
     }
     return
   }
 
   if (finalP === 'right') {
-    contentPos.value.left = right + TRIGGER_GAP
+    contentOffset.value.left = right + TRIGGER_GAP
     arrowPosition.value.left = -arrowWidth / 2
     if (align === 'start') {
-      contentPos.value.top = bottomWidthWinY - cHeight
+      contentOffset.value.top = bottomWidthWinY - cHeight
       arrowPosition.value.top = tHeight / 2 - arrowHeight / 2
     } else if (align === 'end') {
-      contentPos.value.top = topWidthWinY
+      contentOffset.value.top = topWidthWinY
       arrowPosition.value.bottom = tHeight / 2 - arrowHeight / 2
     } else {
-      contentPos.value.top = topWidthWinY + (tHeight - cHeight) / 2
+      contentOffset.value.top = topWidthWinY + (tHeight - cHeight) / 2
       arrowPosition.value.top = cHeight / 2 - arrowHeight / 2
     }
   }
+}
+
+
+/**
+ * 计算手动定位时的位移
+ */
+export function calcOffsetInManual(
+  x: number,
+  y: number,
+  placement: placementType,
+  contentEl: HTMLElement | null,
+  arrowEl: HTMLElement | null,
+  contentOffset: Ref<ContentOffset>,
+  arrowPosition: Ref<ArrowPosition>,
+){
+  if(!contentEl) return
+  const cWidth = contentEl.offsetWidth
+  const cHeight = contentEl.offsetHeight
+
+  // 箭头的宽高
+  const arrowWidth = arrowEl?.offsetWidth ?? 0
+  const arrowHeight = arrowEl?.offsetHeight ?? 0
+
+  let finalX: number = 0
+  let finalY: number = 0
+  const halfCWidth = cWidth / 2
+  const halfCHeight = cHeight / 2
+  const map: Record<placementType, () => void> = {
+    // ===== TOP 系 =====
+    top: () => {
+      finalX = halfCWidth > vWidth - x ? x - cWidth : ( halfCWidth > x ? x : x - halfCWidth)
+      finalY = cHeight + arrowHeight > y ? y : y - (cHeight + arrowHeight)
+    },
+    'top-start': () => {
+      finalX = cWidth > vWidth - x ? x - cWidth : x
+      finalY = cHeight + arrowHeight > y ? y : y - (cHeight + arrowHeight)
+    },
+    'top-end': () => {
+      finalX = cWidth > x ? x : x - cWidth
+      finalY = cHeight + arrowHeight > y ? y : y - (cHeight + arrowHeight)
+    },
+
+    // ===== BOTTOM 系 =====
+    bottom: () => {
+      finalX = halfCWidth > vWidth - x ? x - cWidth : ( halfCWidth > x ? x : x - halfCWidth)
+      finalY = cHeight + arrowHeight > vHeight - y ? y - (cHeight + arrowHeight) : y
+    },
+    'bottom-start': () => {
+      finalX = cWidth > vWidth - x ? x - cWidth : x
+      finalY = cHeight + arrowHeight > vHeight - y ? y - (cHeight + arrowHeight) : y
+    },
+    'bottom-end': () => {
+      finalX = cWidth > x ? x : x - cWidth
+      finalY = cHeight + arrowHeight > vHeight - y ? y - (cHeight + arrowHeight) : y
+    },
+
+    // ===== LEFT 系 =====
+    left: () => {
+      finalX = cWidth + arrowWidth > x ? x : x - (cWidth + arrowWidth)
+      finalY = halfCHeight > y ? y : ( halfCHeight > vHeight - y ? y - cHeight : y - halfCHeight )
+    },
+    'left-start': () => {
+      finalX = cWidth + arrowWidth > x ? x : x - (cWidth + arrowWidth)
+      finalY = cHeight > vHeight - y ? y - cHeight : y 
+    },
+    'left-end': () => {
+      finalX = cWidth + arrowWidth > x ? x : x - (cWidth + arrowWidth)
+      finalY = cHeight > y ? y : y - cHeight
+    },
+
+    // ===== RIGHT 系 =====
+    right: () => {
+      finalX = cWidth + arrowWidth > vWidth - x ? x - (cWidth + arrowWidth) : x
+      finalY = halfCHeight > y ? y : ( halfCHeight > vHeight - y ? y - cHeight : y - halfCHeight )
+    },
+    'right-start': () => {
+      finalX = cWidth + arrowWidth > vWidth - x ? x - (cWidth + arrowWidth) : x
+      finalY = cHeight > vHeight - y ? y - cHeight : y 
+    },
+    'right-end': () => {
+      finalX = cWidth + arrowWidth > vWidth - x ? x - (cWidth + arrowWidth) : x
+      finalY = cHeight > y ? y : y - cHeight
+    },
+  }
+  map[placement]()
+  contentOffset.value.left = finalX
+  contentOffset.value.top = finalY
 }

@@ -2,7 +2,7 @@ import type { ComputedRef, InjectionKey, Ref } from 'vue'
 
 export type BasePlacement = 'top' | 'bottom' | 'left' | 'right'
 export type PlacementAlign = 'start' | 'end' | 'center'
-export type ContentPos = { top: number; left: number }
+export type ContentOffset = { top: number; left: number }
 export class ArrowPosition {
   left: number | undefined = undefined
   top: number | undefined = undefined
@@ -24,7 +24,7 @@ export type placementType =
   | 'right'
   | 'right-start'
   | 'right-end'
-export type triggerType = 'click' | 'hover'
+export type triggerType = 'click' | 'hover' | 'manual'
 
 
 
@@ -34,6 +34,8 @@ export type PopoverProps = {
   visible?: boolean,
   showArrow?: boolean,
   popClass?:string,
+  x?: number, 
+  y?: number,
 }
 export type PopoverEmits = {
   (e: 'update:visible', value: boolean): void
@@ -56,6 +58,8 @@ export type PopoverContext = {
   toggle: () => void
   onContentMouseEnter: () => void
   onContentMouseLeave: () => void
+  x: ComputedRef<number | undefined>
+  y: ComputedRef<number | undefined>
 }
 
 export const popoverContextKey: InjectionKey<PopoverContext> = Symbol('ufi-popover-context')

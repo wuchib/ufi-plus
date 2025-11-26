@@ -28,6 +28,9 @@ const arrowEl = ref<HTMLElement | null>(null)
 const innerVisible = ref(props.visible ?? false)
 const isControlled = computed(() => props.visible !== undefined)
 const isShowPop = computed(() => (isControlled.value ? !!props.visible : innerVisible.value))
+const x = computed(() => props.x)
+const y = computed(() => props.y)
+
 
 const placement = computed(() => props.placement ?? 'bottom')
 const trigger = computed(() => props.trigger ?? 'hover')
@@ -84,8 +87,7 @@ const handleTriggerMouseLeave = () => {
 }
 
 const handleTriggerClick = () => {
-  if (trigger.value !== 'click') return
-  togglePopover()
+  if (['click', 'manual'].includes(trigger.value)) togglePopover()
 }
 
 const handleContentMouseEnter = () => {
@@ -126,6 +128,16 @@ const unregisterTriggerEvent = () => {
 
 onMounted(() => {
   triggerEl.value = popoverWrapRef.value?.firstElementChild as HTMLElement | null
+  if(triggerEl.value === null && trigger.value === 'manual' ){
+    return
+    /**
+     * todo.. 当没有触发器元素 且 传入了 x 和 y
+     * 1. 不需注册按钮事件
+     * 2. 监听 visible ,为 true 时赋予弹出层 位置信息 x, y
+     * 3. 定位为 fixed
+     * 4. 位置计算
+     */
+  }
   registerTriggerEvent()
   if (trigger.value === 'click') {
     document.addEventListener('click', handleDocumentClick, true)
@@ -135,9 +147,8 @@ onMounted(() => {
 watch(
   () => props.visible,
   (val) => {
-    if (val !== undefined) {
-      innerVisible.value = val
-    }
+    if (val === undefined) return
+    innerVisible.value = val
   }
 )
 
@@ -164,6 +175,8 @@ const context: PopoverContext = {
   toggle: togglePopover,
   onContentMouseEnter: handleContentMouseEnter,
   onContentMouseLeave: handleContentMouseLeave,
+  x,
+  y
 }
 
 provide(popoverContextKey, context)
