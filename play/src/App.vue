@@ -18,7 +18,7 @@ function handleClick(e: MouseEvent) {
 </script>
 
 <template>
-  <div style="padding:24px; position:relative;height: 1000px;width: 100vw;" @click="handleClick($event)">
+  <div style="padding:24px; position:relative;height: 1000px;width: 100vw;" @click="handleClick">
     
     <div class="test">
       <UPoppover :visible="visible" :x="x" :y="y" placement="left" :show-arrow="false" trigger="manual" pop-class="customClass">

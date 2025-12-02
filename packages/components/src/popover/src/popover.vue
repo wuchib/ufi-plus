@@ -87,7 +87,7 @@ const handleTriggerMouseLeave = () => {
 }
 
 const handleTriggerClick = () => {
-  if (['click', 'manual'].includes(trigger.value)) togglePopover()
+  if (trigger.value === 'click' && triggerEl.value !== null) togglePopover()
 }
 
 const handleContentMouseEnter = () => {
